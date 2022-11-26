@@ -29,13 +29,13 @@ def normalize_address(row):
                 nd = normalize_addr_dict(d)
             except (AmbiguousAddressError, UnParseableAddressError):
                 nd = d
-    if nd.get('address_line_2') is None:
+    if nd.get('address_line_2') is None and row.unit:
         nd['address_line_2'] = 'UNIT ' + row.unit
     return nd
 
 
 def parse_address(row):
-    a = ', '.join(filter(bool, [row.n_address_line_1, row.n_address_line_2]))
+    a = ', '.join(filter(lambda x: x and not pd.isnull(x), [row.n_address_line_1, row.n_address_line_2]))
     try:
         d = usaddress.tag(a)[0]
     except usaddress.RepeatedLabelError:
