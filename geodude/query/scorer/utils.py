@@ -60,4 +60,6 @@ def _get_candidates(d, df):
 def candidates_to_dict(df):
     accuracy_type = df.iloc[0]['accuracy_type']
     keys = accuracy_type__field__map[accuracy_type]
-    return df[keys].to_dict('records')
+    df = df[keys]
+    df['lat_long'] = df.lat_long.progress_apply(lambda row: (row.x, row.y))
+    return df.to_dict('records')

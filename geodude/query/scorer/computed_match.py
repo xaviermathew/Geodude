@@ -52,7 +52,7 @@ def score_parcel_match_candidates(row, d):
 
 
 def compute_centroid(df):
-    return df.geometry.centroid
+    return df.dissolve().centroid
 
 
 def compute_street_center(df):
@@ -73,33 +73,32 @@ def get_candidates(d, df, max_results=10):
     else:
         matches = filter_df(candidates, parsed, street_match_keys, operator.and_)
         if len(matches) > 0:
+            matches['lat_long'] = compute_street_center(matches)
             matches = matches[:1]
             matches['score'] = 0.9
             matches['accuracy_type'] = accuracy_type_street_center
-            matches['lat_long'] = compute_street_center(matches)
             return matches
         else:
             matches = filter_df(candidates, parsed, zip5_match_keys, operator.and_)
             if len(matches) > 0:
+                matches['lat_long'] = compute_centroid(matches)
                 matches = matches[:1]
                 matches['score'] = 0.75
                 matches['accuracy_type'] = accuracy_type_zip5
-                matches['lat_long'] = compute_centroid(matches)
                 return matches
             else:
-                import pdb;pdb.set_trace()
                 matches = filter_df(candidates, parsed, city_match_keys, operator.and_)
                 if len(matches) > 0:
+                    matches['lat_long'] = compute_centroid(matches)
                     matches = matches[:1]
                     matches['score'] = 0.5
                     matches['accuracy_type'] = accuracy_type_city
-                    matches['lat_long'] = compute_centroid(matches)
                     return matches
                 else:
                     matches = filter_df(candidates, parsed, state_match_keys, operator.and_)
                     if len(matches) > 0:
+                        matches['lat_long'] = compute_centroid(matches)
                         matches = matches[:1]
                         matches['score'] = 0.25
                         matches['accuracy_type'] = accuracy_type_state
-                        matches['lat_long'] = compute_centroid(matches)
                         return matches
